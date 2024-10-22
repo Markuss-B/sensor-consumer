@@ -40,10 +40,13 @@ public class MqttMessageProcessingService
             "productNumber" => HandleSensorMetadataAsync(topic, payload, "ProductNumber"),
             "group" => HandleSensorMetadataAsync(topic, payload, "Group"),
             "groupId" => HandleSensorMetadataAsync(topic, payload, "GroupId"),
-            _ => throw new InvalidOperationException($"Unknown topic: {topic}")
+            _ => null
         };
 
-        await task;
+        if (task == null)
+            _logger.LogWarning("Not processing unknown topic: {topic}", topic);
+        else
+            await task;
     }
 
     private async Task HandleTopic(string topic)
@@ -51,7 +54,8 @@ public class MqttMessageProcessingService
         var topicParts = topic.Split('/');
         if (topicParts.Length < 4)
         {
-            throw new InvalidOperationException($"Invalid topic: {topic}");
+            _logger.LogWarning("Topic doesn't contain sensor: {topic}", topic);
+            return;
         }
 
         var rootTopic = topicParts[0];

@@ -35,21 +35,21 @@ namespace MqqtConsumer
             await base.StartAsync(cancellationToken);
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Worker starting...");
 
             int retryCount = 0;
             int maxRetryDelay = 30; // Max delay in seconds
 
-            while (!stoppingToken.IsCancellationRequested)
+            while (!cancellationToken.IsCancellationRequested)
             {
                 try
                 {
                     if (!_mqttClient.IsConnected)
                     {
-                        await ConnectToBroker(stoppingToken);
-                        await SubscribeToTopic(stoppingToken);
+                        await ConnectToBroker(cancellationToken);
+                        await SubscribeToTopic(cancellationToken);
 
                         retryCount = 0;
                     }
@@ -57,7 +57,7 @@ namespace MqqtConsumer
                     _logger.LogInformation("Worker is alive and running. Messages counted so far: {messageCount}", _messageCount);
 
                     // Wait before checking again
-                    await Task.Delay(5000, stoppingToken);
+                    await Task.Delay(5000, cancellationToken);
                 }
                 catch (Exception ex)
                 {
@@ -72,7 +72,7 @@ namespace MqqtConsumer
                         _logger.LogCritical(ex, "Maximum retry limit reached. Manual intervention might be required.");
 
                     // Wait for the backoff period or until cancellation is requested
-                    await Task.Delay(TimeSpan.FromSeconds(backoffDelay), stoppingToken);
+                    await Task.Delay(TimeSpan.FromSeconds(backoffDelay), cancellationToken);
                 }
             }
         }

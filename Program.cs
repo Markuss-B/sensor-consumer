@@ -6,6 +6,13 @@ using MqqtConsumer.Services;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+var config = new ConfigurationBuilder()
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddEnvironmentVariables()
+    .Build();
+
 builder.Services.Configure<MqttSettings>(builder.Configuration.GetSection("MqttSettings"));
 
 builder.Services.AddDbContext<SensorDbContext>(options =>

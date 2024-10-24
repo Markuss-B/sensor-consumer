@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MqqtConsumer.Data;
+using MqttConsumer.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;

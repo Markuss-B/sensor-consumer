@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using MqqtConsumer.Data;
+using MqttConsumer.Data;
 
 #nullable disable
 
-namespace MqqtConsumer.Migrations
+namespace MqttConsumer.Migrations
 {
     [DbContext(typeof(SensorDbContext))]
     partial class SensorDbContextModelSnapshot : ModelSnapshot

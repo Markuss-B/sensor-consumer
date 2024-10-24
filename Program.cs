@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using MqqtConsumer;
-using MqqtConsumer.Data;
-using MqqtConsumer.Models;
-using MqqtConsumer.Services;
+using Microsoft.Extensions.Options;
+using MqttConsumer;
+using MqttConsumer.Configuration;
+using MqttConsumer.Configuration.Validators;
+using MqttConsumer.Data;
+using MqttConsumer.Services;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -14,13 +16,19 @@ var config = new ConfigurationBuilder()
     .Build();
 
 builder.Services.Configure<MqttSettings>(builder.Configuration.GetSection("MqttSettings"));
+builder.Services.AddSingleton<IValidateOptions<MqttSettings>, MqttSettingsValidation>();
+
+builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
 
 builder.Services.AddDbContext<SensorDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("SensorDb"));
 });
 
-builder.Services.AddScoped<MqttMessageProcessingService>();
+builder.Services.AddSingleton<MongoDbContext>();
+
+builder.Services.AddSingleton<MqttMessageProcessingService>();
+builder.Services.AddSingleton<SensorService>();
 
 builder.Services.AddHostedService<Worker>();
 

@@ -1,28 +1,29 @@
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Formatter;
-using MqqtConsumer.Helpers;
-using MqqtConsumer.Models;
+using MqttConsumer.Helpers;
 using Microsoft.Extensions.Options;
 using System.Text;
 using System.Text.Json;
-using MqqtConsumer.Services;
+using MqttConsumer.Services;
+using MqttConsumer.Configuration;
 
-namespace MqqtConsumer
+namespace MqttConsumer
 {
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
         private readonly IServiceProvider _serviceProvider;
         private readonly MqttSettings _mqttSettings;
+        private readonly MqttMessageProcessingService _processingService;
         private IMqttClient _mqttClient;
         private MqttFactory _mqttFactory;
         private int _messageCount = 0;
 
-        public Worker(ILogger<Worker> logger, IServiceProvider serviceProvider, IOptions<MqttSettings> options)
+        public Worker(ILogger<Worker> logger, MqttMessageProcessingService processingService, IOptions<MqttSettings> options)
         {
             _logger = logger;
-            _serviceProvider = serviceProvider;
+            _processingService = processingService;
             _mqttSettings = options.Value;
             _mqttFactory = new MqttFactory();
         }
@@ -149,9 +150,8 @@ namespace MqqtConsumer
 
             try
             {
-                using var scope = _serviceProvider.CreateScope();
-                var mqttMessageProcessingService = scope.ServiceProvider.GetRequiredService<MqttMessageProcessingService>();
-                await mqttMessageProcessingService.ProcessMessageAsync(e.ApplicationMessage.Topic, e.ApplicationMessage.ConvertPayloadToString());
+                await _processingService.ProcessMessageAsync(e.ApplicationMessage.Topic, e.ApplicationMessage.ConvertPayloadToString());
+
                 _logger.LogInformation("Successfully processed message.");
             }
             catch (Exception ex)

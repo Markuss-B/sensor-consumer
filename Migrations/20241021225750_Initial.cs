@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace MqqtConsumer.Migrations
+namespace MqttConsumer.Migrations
 {
     /// <inheritdoc />
     public partial class Initial : Migration

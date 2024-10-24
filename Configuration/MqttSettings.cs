@@ -1,8 +1,15 @@
-﻿namespace MqttConsumer.Configuration;
+﻿using MQTTnet.Formatter;
+using System.Security.Authentication;
+
+namespace MqttConsumer.Configuration;
 public class MqttSettings
 {
+    public string Username { get; set; }
+    public string Password { get; set; }
+    public string PathToPem { get; set; }
+    public SslProtocols SslProtocol { get; set; }
     public string Broker { get; set; }
-    public string ProtocolVersion { get; set; }
+    public MqttProtocolVersion ProtocolVersion { get; set; }
     public string TopicFilter { get; set; }
     public string TopicSchema { get; set; }
     public string[] SplitTopicSchema { get; set; }  // Store the split schema

@@ -7,6 +7,8 @@ using System.Text;
 using System.Text.Json;
 using MqttConsumer.Services;
 using MqttConsumer.Configuration;
+using System.Security.Cryptography.X509Certificates;
+using System.Security.Authentication;
 
 namespace MqttConsumer
 {
@@ -16,6 +18,10 @@ namespace MqttConsumer
         private readonly IServiceProvider _serviceProvider;
         private readonly MqttSettings _mqttSettings;
         private readonly MqttMessageProcessingService _processingService;
+
+        private readonly MqttClientOptions _mqttClientOptions;
+        private readonly X509Certificate2Collection _x509Certificate2s;
+
         private IMqttClient _mqttClient;
         private MqttFactory _mqttFactory;
         private int _messageCount = 0;
@@ -26,6 +32,21 @@ namespace MqttConsumer
             _processingService = processingService;
             _mqttSettings = options.Value;
             _mqttFactory = new MqttFactory();
+
+            _x509Certificate2s = new X509Certificate2Collection();
+            _x509Certificate2s.ImportFromPemFile(_mqttSettings.PathToPem);
+            _mqttClientOptions = new MqttClientOptionsBuilder()
+                .WithTcpServer(_mqttSettings.Broker)
+                .WithProtocolVersion(_mqttSettings.ProtocolVersion)
+                .WithCredentials(_mqttSettings.Username, _mqttSettings.Password)
+                .WithTlsOptions(new MqttClientTlsOptions()
+                {
+                    UseTls = true,
+                    TrustChain = _x509Certificate2s,
+                    SslProtocol = _mqttSettings.SslProtocol,
+                    CertificateValidationHandler = CertificateValidationHandler
+                })
+                .Build();
         }
 
         public override async Task StartAsync(CancellationToken cancellationToken)
@@ -103,19 +124,7 @@ namespace MqttConsumer
         {
             _logger.LogInformation("Connecting to MQTT broker: {broker}", _mqttSettings.Broker);
 
-            // Parse the protocol version from the configuration string
-            if (!Enum.TryParse(_mqttSettings.ProtocolVersion, out MqttProtocolVersion protocolVersion))
-            {
-                _logger.LogError("Invalid protocol version in configuration: {protocolVersion}", _mqttSettings.ProtocolVersion);
-                protocolVersion = MqttProtocolVersion.Unknown;
-            }
-
-            MqttClientOptions options = new MqttClientOptionsBuilder()
-                .WithTcpServer(_mqttSettings.Broker)
-                .WithProtocolVersion(protocolVersion)
-                .Build();
-
-            MqttClientConnectResult response = await _mqttClient.ConnectAsync(options, cancellationToken);
+            MqttClientConnectResult response = await _mqttClient.ConnectAsync(_mqttClientOptions, cancellationToken);
 
             if (response.ResultCode == MqttClientConnectResultCode.Success)
             {
@@ -127,6 +136,19 @@ namespace MqttConsumer
             }
 
             _logger.LogDebug("Response: {response}", response.ToJsonString());
+        }
+
+        private bool CertificateValidationHandler(MqttClientCertificateValidationEventArgs eventArgs)
+        {
+            _logger.LogError("Certificate Validation Handler called.");
+
+            _logger.LogError("Certificate Subject: {subject}", eventArgs.Certificate.Subject.ToJsonString());
+            _logger.LogError("Certificate Expiration Date: {expirationDate}", eventArgs.Certificate.GetExpirationDateString().ToJsonString());
+            _logger.LogError("Chain Revocation Mode: {revocationMode}", eventArgs.Chain.ChainPolicy.RevocationMode.ToJsonString());
+            _logger.LogError("Chain Status: {chainStatus}", eventArgs.Chain.ChainStatus.ToJsonString());
+            _logger.LogError("SSL Policy Errors: {sslPolicyErrors}", eventArgs.SslPolicyErrors.ToJsonString());
+
+            return true;
         }
 
         private async Task SubscribeToTopic(CancellationToken cancellationToken)

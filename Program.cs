@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MqttConsumer;
 using MqttConsumer.Configuration;
@@ -19,11 +18,6 @@ builder.Services.Configure<MqttSettings>(builder.Configuration.GetSection("MqttS
 builder.Services.AddSingleton<IValidateOptions<MqttSettings>, MqttSettingsValidation>();
 
 builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
-
-builder.Services.AddDbContext<SensorDbContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SensorDb"));
-});
 
 builder.Services.AddSingleton<MongoDbContext>();
 

@@ -9,12 +9,11 @@ docker network create mynetwork
 ```
 
 2. Create db
+https://www.mongodb.com/docs/manual/tutorial/install-mongodb-community-with-docker/
 ```
-docker pull mcr.microsoft.com/mssql/server:2022-latest
-docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=[yourpassword]" -p 1433:1433 --name sql1 --hostname sql1 --network mynetwork -d mcr.microsoft.com/mssql/server:2022-latest
+docker pull mongodb/mongodb-community-server:latest
+docker run --name mongodb --network mynetwork -p 27017:27017 -d mongodb/mongodb-community-server:latest
 ```
-https://learn.microsoft.com/en-us/sql/linux/quickstart-install-connect-docker
-2.1. Create db user
 
 3. Create app image and run container
 In project folder
@@ -24,3 +23,8 @@ docker build -t mqtt-aranet-sensor-consumer .
 docker run -d --env-file .env --name mqtt-aranet-sensor-consumer --network mynetwork mqtt-aranet-sensor-consumer
 ```
 or just build the image and specify variables in run command
+
+to limit resources
+```
+docker run -d --env-file .env --name mqtt-aranet-sensor-consumer-limited-resources --network mynetwork --memory="256m" --cpus="0.5" mqtt-aranet-sensor-consumer
+```

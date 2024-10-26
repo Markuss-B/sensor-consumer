@@ -26,3 +26,13 @@ public class SensorMeasurements
     */
 }
 
+public class SensorMeasurementsRaw
+{
+    [BsonId]
+    public ObjectId Id { get; set; }
+    [BsonElement("sensorId")]
+    public string SensorId { get; set; }
+    [BsonExtraElements]
+    public BsonDocument Measurements { get; set; }
+}
+

@@ -83,7 +83,11 @@ public class MqttMessageProcessingService
     /// <returns></returns>
     private async Task HandleMeasurementsAsync(string sensorId, string payload)
     {
+        var tasks = new List<Task>();
+
         JObject jsonDocument = JObject.Parse(payload);
+
+        tasks.Add(_sensorService.SaveMeasurementsRawAsync(sensorId, jsonDocument.ToString()));
 
         long unixTime;
         DateTime timestamp;
@@ -115,7 +119,9 @@ public class MqttMessageProcessingService
 
         string jsonString = jsonDocument.ToString();
 
-        await _sensorService.SaveMeasurementsAsync(sensorId, timestamp, jsonString);
+        tasks.Add(_sensorService.SaveMeasurementsAsync(sensorId, timestamp, jsonString));
+
+        await Task.WhenAll(tasks);
     }
 
     // Generic handler for sensor metadata

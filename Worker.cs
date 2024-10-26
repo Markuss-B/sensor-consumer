@@ -56,7 +56,7 @@ public class Worker : BackgroundService
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
         _mqttClient = _mqttFactory.CreateMqttClient();
-        _mqttClient.ApplicationMessageReceivedAsync += HandleReceivedMessage;
+        _mqttClient.ApplicationMessageReceivedAsync += ea => HandleReceivedMessage(cancellationToken, ea);
 
         await base.StartAsync(cancellationToken);
     }
@@ -145,25 +145,31 @@ public class Worker : BackgroundService
         _logger.LogInformation("MQTT client subscribed to topic: {_mqttSettings.TopicFilter}", _mqttSettings.TopicFilter);
     }
 
-    private async Task HandleReceivedMessage(MqttApplicationMessageReceivedEventArgs e)
+    private async Task HandleReceivedMessage(CancellationToken cancellationToken, MqttApplicationMessageReceivedEventArgs e)
     {
-        _messageCount++;
-        _logger.LogInformation("Received message on topic {topic}. Message: {message}. Message count: {_messageCount}", e.ApplicationMessage.Topic, e.ToJsonString(), _messageCount);
+        e.AutoAcknowledge = false;
+        int messageNumber = _messageCount++;
 
-        _logger.LogInformation("Payload: {payload}", e.ApplicationMessage.ConvertPayloadToString());
-
-        try
+        async Task ProcessAsync()
         {
-            await _processingService.ProcessMessageAsync(e.ApplicationMessage.Topic, e.ApplicationMessage.ConvertPayloadToString());
+            try
+            {
+                _logger.LogInformation("Received message on topic {topic}. Message count: {messageNumber}", e.ApplicationMessage.Topic, messageNumber);
 
-            _logger.LogInformation("Successfully processed message.");
+                if (_logger.IsEnabled(LogLevel.Debug))
+                    _logger.LogDebug("Message: {message};Payload: {payload}", e.ToJsonString(), e.ApplicationMessage.ConvertPayloadToString());
+
+                await _processingService.ProcessMessageAsync(e.ApplicationMessage.Topic, e.ApplicationMessage.ConvertPayloadToString());
+                await e.AcknowledgeAsync(cancellationToken);
+
+                _logger.LogInformation("Successfully processed message number {messageNumber}.", messageNumber);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing MQTT message.");
+            }
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error processing MQTT message.");
-        }
 
-        await Task.CompletedTask;
-
+        _ = Task.Run(ProcessAsync, cancellationToken);
     }
 }

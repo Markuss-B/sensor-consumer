@@ -32,7 +32,7 @@ public class SensorService
         // Insert the document into MongoDB
         await _context.sensorMeasurements.InsertOneAsync(sensorMeasurement);
 
-        _logger.LogInformation("Saved measurements for sensor with ID '{SensorId}' at timestamp '{Timestamp}'.", sensorId, timestamp);
+        _logger.LogInformation("Saved measurements for sensor with ID '{SensorId}' with timestamp '{Timestamp}'.", sensorId, timestamp);
     }
 
     public async Task UpdateSensorMetadataAsync(string sensorId, string fieldName, string newValue)

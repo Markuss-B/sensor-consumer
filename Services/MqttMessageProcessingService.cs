@@ -43,7 +43,7 @@ public class MqttMessageProcessingService
         };
 
         if (handlerTask == null)
-            _logger.LogWarning("Not processing unknown topic: {topic}", topic);
+            _logger.LogInformation("Not processing unknown topic: {topic}", topic);
         else
             tasks.Add(handlerTask);
 

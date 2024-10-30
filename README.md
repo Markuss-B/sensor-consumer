@@ -12,7 +12,7 @@ docker network create mynetwork
 https://www.mongodb.com/docs/manual/tutorial/install-mongodb-community-with-docker/
 ```
 docker pull mongodb/mongodb-community-server:latest
-docker run --name mongodb --network mynetwork -p 27017:27017 -d mongodb/mongodb-community-server:latest
+docker run --name mongodb --network mynetwork -p 127.0.0.1:27017:27017 -d mongodb/mongodb-community-server:latest mongod --replSet rs0
 ```
 
 3. Create app image and run container

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0]
+### Removed
+- Raw data saving to the database. Now only saves measurements with time converted from unix timestamp to datetime.
+- This will be the first deployed version.
+
 ## [1.0.0-alpha.1] - 2024-11-05
 ### Added
 - Initial setup for the experimental version.

@@ -87,7 +87,7 @@ public class MqttMessageProcessingService
 
         JObject jsonDocument = JObject.Parse(payload);
 
-        tasks.Add(_sensorService.SaveMeasurementsRawAsync(sensorId, jsonDocument.ToString()));
+        //tasks.Add(_sensorService.SaveMeasurementsRawAsync(sensorId, jsonDocument.ToString()));
 
         long unixTime;
         DateTime timestamp;

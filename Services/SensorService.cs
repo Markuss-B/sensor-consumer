@@ -35,22 +35,22 @@ public class SensorService
         _logger.LogInformation("Saved measurements for sensor with ID '{SensorId}' with timestamp '{Timestamp}'.", sensorId, timestamp);
     }
 
-    public async Task SaveMeasurementsRawAsync(string sensorId, string jsonString)
-    { 
-        var measurements = BsonDocument.Parse(jsonString);
+    //public async Task SaveMeasurementsRawAsync(string sensorId, string jsonString)
+    //{ 
+    //    var measurements = BsonDocument.Parse(jsonString);
 
-        // Create a SensorMeasurement object
-        var sensorMeasurementRaw = new SensorMeasurementsRaw
-        {
-            SensorId = sensorId,
-            Measurements = measurements
-        };
+    //    // Create a SensorMeasurement object
+    //    var sensorMeasurementRaw = new SensorMeasurementsRaw
+    //    {
+    //        SensorId = sensorId,
+    //        Measurements = measurements
+    //    };
 
-        // Insert the document into MongoDB
-        await _context.sensorMeasurementsRaw.InsertOneAsync(sensorMeasurementRaw);
+    //    // Insert the document into MongoDB
+    //    await _context.sensorMeasurementsRaw.InsertOneAsync(sensorMeasurementRaw);
 
-        _logger.LogInformation("Saved raw measurements for sensor with ID '{SensorId}'.", sensorId);
-    }
+    //    _logger.LogInformation("Saved raw measurements for sensor with ID '{SensorId}'.", sensorId);
+    //}
 
     public async Task UpdateSensorMetadataAsync(string sensorId, string fieldName, string newValue)
     {

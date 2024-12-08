@@ -10,11 +10,18 @@ public class SensorService
 {
     private readonly ILogger<SensorService> _logger;
     private readonly MongoDbContext _context;
+    private readonly InactiveSensorCache _inactiveSensorCache;
 
-    public SensorService(ILogger<SensorService> logger, MongoDbContext context)
+    public SensorService(ILogger<SensorService> logger, MongoDbContext context, InactiveSensorCache inactiveSensorCache)
     {
         _logger = logger;
         _context = context;
+        _inactiveSensorCache = inactiveSensorCache;
+    }
+
+    public bool IsSensorInactive(string sensorId)
+    {
+        return _inactiveSensorCache.IsSensorInactive(sensorId);
     }
 
     public async Task SaveMeasurementsAsync(string sensorId, DateTime timestamp, string jsonString)
@@ -93,11 +100,11 @@ public class SensorService
         }
         else if (result.ModifiedCount == 0)
         {
-            _logger.LogInformation("Sensor with ID '{SensorId}' failed to update with topic '{Topic}'.", sensorId, topic);
+            _logger.LogInformation("Sensor with ID '{SensorId}' already had the topic '{Topic}'. No changes were made.", sensorId, topic);
         }
         else
         {
-            _logger.LogInformation("Successfully updated sensor with ID '{SensorId}' pushed topic '{Topic}'.", sensorId, topic);
+            _logger.LogInformation("Successfully added topic '{Topic}' to sensor with ID '{SensorId}'.", topic, sensorId);
         }
     }
 }

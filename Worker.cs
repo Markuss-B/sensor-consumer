@@ -71,7 +71,7 @@ public class Worker : BackgroundService
         {
             try
             {
-                if (!await _mqttClient.TryPingAsync())
+                if (!await _mqttClient.TryPingAsync(cancellationToken))
                 {
                     await _mqttClient.ConnectAsync(_mqttClientOptions, cancellationToken);
                     _logger.LogInformation("Connected to MQTT broker");
@@ -152,21 +152,24 @@ public class Worker : BackgroundService
 
         async Task ProcessAsync()
         {
-            try
+            using (_logger.BeginScope("Message number {messageNumber}, Topic: {topic}", messageNumber, e.ApplicationMessage.Topic))
             {
-                _logger.LogInformation("Received message on topic {topic}. Message count: {messageNumber}", e.ApplicationMessage.Topic, messageNumber);
+                try
+                {
+                    _logger.LogInformation("Received message. Message count: {messageNumber}", e.ApplicationMessage.Topic, messageNumber);
 
-                if (_logger.IsEnabled(LogLevel.Debug))
-                    _logger.LogDebug("Message: {message};Payload: {payload}", e.ToJsonString(), e.ApplicationMessage.ConvertPayloadToString());
+                    if (_logger.IsEnabled(LogLevel.Debug))
+                        _logger.LogDebug("Message: {message};Payload: {payload}", e.ToJsonString(), e.ApplicationMessage.ConvertPayloadToString());
 
-                await _processingService.ProcessMessageAsync(e.ApplicationMessage.Topic, e.ApplicationMessage.ConvertPayloadToString());
-                await e.AcknowledgeAsync(cancellationToken);
+                    await _processingService.ProcessMessageAsync(e.ApplicationMessage.Topic, e.ApplicationMessage.ConvertPayloadToString());
+                    await e.AcknowledgeAsync(cancellationToken);
 
-                _logger.LogInformation("Successfully processed message number {messageNumber}.", messageNumber);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error processing MQTT message.");
+                    _logger.LogInformation("Processed message number {messageNumber}.", messageNumber);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error processing MQTT message.");
+                }
             }
         }
 

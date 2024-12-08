@@ -4,6 +4,7 @@ using MqttConsumer.Configuration;
 using MqttConsumer.Configuration.Validators;
 using MqttConsumer.Data;
 using MqttConsumer.Services;
+using MqttConsumer.Workers;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -20,10 +21,12 @@ builder.Services.AddSingleton<IValidateOptions<MqttSettings>, MqttSettingsValida
 builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
 
 builder.Services.AddSingleton<MongoDbContext>();
+builder.Services.AddSingleton<InactiveSensorCache>();
 
 builder.Services.AddSingleton<MqttMessageProcessingService>();
 builder.Services.AddSingleton<SensorService>();
 
+builder.Services.AddHostedService<InactiveSensorCacheWorker>();
 builder.Services.AddHostedService<Worker>();
 
 var host = builder.Build();

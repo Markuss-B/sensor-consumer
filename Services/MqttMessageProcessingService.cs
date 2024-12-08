@@ -9,6 +9,7 @@ public class MqttMessageProcessingService
 {
     private readonly ILogger<MqttMessageProcessingService> _logger;
     private readonly SensorService _sensorService;
+
     private readonly string[] _topicSchema;
     private readonly int _sensorIdPosition;
 
@@ -23,9 +24,15 @@ public class MqttMessageProcessingService
     // Main method that receives the message and delegates to the appropriate handler
     public async Task ProcessMessageAsync(string topic, string payload)
     {
-        // Extract the last part of the topic to identify the payload type
         string[] topicParts = topic.Split('/');
         string sensorId = topicParts[_sensorIdPosition];
+
+        if (_sensorService.IsSensorInactive(sensorId))
+        {
+            _logger.LogInformation("Sensor with ID '{SensorId}' is inactive. Skipping message processing.", sensorId);
+            return;
+        }
+
         string payloadType = topicParts.Last();
 
         List<Task> tasks = [];

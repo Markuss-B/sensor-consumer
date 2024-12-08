@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using MqttConsumer.Configuration;
+using MqttConsumer.Models;
 using Newtonsoft.Json.Linq;
 
 namespace MqttConsumer.Services;
@@ -29,7 +30,7 @@ public class MqttMessageProcessingService
 
         List<Task> tasks = [];
 
-        tasks.Add(HandleTopic(sensorId, topicParts));
+        tasks.Add(HandleTopic(sensorId, topic));
 
         // Use a switch expression to route to the appropriate handler
         var handlerTask = payloadType switch
@@ -50,9 +51,13 @@ public class MqttMessageProcessingService
         await Task.WhenAll(tasks);
     }
 
-    private async Task HandleTopic(string sensorId, string[] topicParts)
+    private async Task HandleTopic(string sensorId, string topic)
     {
         var tasks = new List<Task>();
+
+        tasks.Add(_sensorService.UpdateSensorTopicsAsync(sensorId, topic));
+
+        string[] topicParts = topic.Split('/');
 
         for (int i = 0; i < _topicSchema.Length; i++)
         {

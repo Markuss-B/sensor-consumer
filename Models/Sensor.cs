@@ -6,11 +6,8 @@ public class Sensor
 {
     [BsonId]
     public string Id { get; set; } // Unique ID for the sensor
-    [BsonElement("baseSerial")]
-    public string? BaseSerialNumber { get; set; } // Serial number of the base unit
-    [BsonElement("rootTopic")]
-    public string? RootTopic { get; set; } // Root topic for the sensor
-    [BsonElement("name")]
+    [BsonElement("topics")]
+    public HashSet<string> Topics { get; set; } // List of topics for the sensor
     public string? Name { get; set; } // Sensor name
     [BsonElement("productNumber")]
     public string? ProductNumber { get; set; } // Product number of the sensor

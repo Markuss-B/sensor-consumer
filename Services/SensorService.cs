@@ -2,6 +2,7 @@
 using MongoDB.Driver;
 using MqttConsumer.Data;
 using MqttConsumer.Models;
+using MQTTnet.Internal;
 
 namespace MqttConsumer.Services;
 
@@ -64,7 +65,7 @@ public class SensorService
 
         if (result.UpsertedId != null)
         {
-            _logger.LogInformation("A new document was inserted with ID '{DocumentId}'.", result.UpsertedId);
+            _logger.LogInformation("A new document was inserted with ID '{DocumentId}' and field '{FieldName}' with value '{NewValue}'.", result.UpsertedId, fieldName, newValue);
         }
         else if (result.ModifiedCount == 0)
         {
@@ -76,5 +77,27 @@ public class SensorService
         }
     }
 
+    public async Task UpdateSensorTopicsAsync(string sensorId, string topic)
+    {
+        var filter = Builders<Sensor>.Filter.Eq(s => s.Id, sensorId);
+        var update = Builders<Sensor>.Update
+            .AddToSet(s => s.Topics, topic);
 
+        var updateOptions = new UpdateOptions { IsUpsert = true };
+
+        var result = await _context.sensors.UpdateOneAsync(filter, update, updateOptions);
+
+        if (result.UpsertedId != null)
+        {
+            _logger.LogInformation("A new document was inserted with ID '{DocumentId}' and topic '{Topic}'.", result.UpsertedId, topic);
+        }
+        else if (result.ModifiedCount == 0)
+        {
+            _logger.LogInformation("Sensor with ID '{SensorId}' failed to update with topic '{Topic}'.", sensorId, topic);
+        }
+        else
+        {
+            _logger.LogInformation("Successfully updated sensor with ID '{SensorId}' pushed topic '{Topic}'.", sensorId, topic);
+        }
+    }
 }

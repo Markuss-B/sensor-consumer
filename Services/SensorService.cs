@@ -63,7 +63,9 @@ public class SensorService
     public async Task UpdateSensorMetadataAsync(string sensorId, string fieldName, string newValue)
     {
         var filter = Builders<Sensor>.Filter.Eq(s => s.Id, sensorId);
-        var update = Builders<Sensor>.Update.Set(fieldName, newValue);
+        var update = Builders<Sensor>.Update
+            .Set(fieldName, newValue)
+            .CurrentDate(s => s.LastUpdated);
 
         // Set the upsert option to true
         var updateOptions = new UpdateOptions { IsUpsert = true };
@@ -88,7 +90,8 @@ public class SensorService
     {
         var filter = Builders<Sensor>.Filter.Eq(s => s.Id, sensorId);
         var update = Builders<Sensor>.Update
-            .AddToSet(s => s.Topics, topic);
+            .AddToSet(s => s.Topics, topic)
+            .CurrentDate(s => s.LastUpdated);
 
         var updateOptions = new UpdateOptions { IsUpsert = true };
 

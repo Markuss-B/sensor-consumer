@@ -19,6 +19,8 @@ public class Sensor
     public string? GroupId { get; set; } // Group ID of the sensor
     [BsonElement("isActive")]
     public bool IsActive { get; set; } // Flag indicating if sensor messages should be processed
+    [BsonElement("lastUpdated")]
+    public DateTime LastUpdated { get; set; } // Last updated timestamp
     [BsonExtraElements]
     public BsonDocument? ExtraElements { get; set; } // Additional fields that are not mapped to properties
 }

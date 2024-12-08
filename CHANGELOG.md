@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Topic saving. Adds topics to sensor topic set.
 - Inactive sensor caching to avoid processing inactive sensors.
+- LastUpdate field to sensor metadata updates.
 ### Removed
 - Individual metadata saving from topic. Still functional but not to be used in prod until further notice.
 

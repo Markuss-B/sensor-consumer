@@ -14,10 +14,10 @@ namespace MqttConsumer.Workers;
 public class InactiveSensorCacheWorker : BackgroundService
 {
     private readonly ILogger<InactiveSensorCacheWorker> _logger;
-    private MongoDbContext _db;
+    private MongoDb _db;
     private InactiveSensorCache _cache;
 
-    public InactiveSensorCacheWorker(ILogger<InactiveSensorCacheWorker> logger, MongoDbContext db, InactiveSensorCache inactiveSensorCache)
+    public InactiveSensorCacheWorker(ILogger<InactiveSensorCacheWorker> logger, MongoDb db, InactiveSensorCache inactiveSensorCache)
     {
         _logger = logger;
         _db = db;

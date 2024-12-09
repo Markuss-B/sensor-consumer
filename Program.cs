@@ -20,7 +20,7 @@ builder.Services.AddSingleton<IValidateOptions<MqttSettings>, MqttSettingsValida
 
 builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
 
-builder.Services.AddSingleton<MongoDbContext>();
+builder.Services.AddSingleton<MongoDb>();
 builder.Services.AddSingleton<InactiveSensorCache>();
 
 builder.Services.AddSingleton<MqttMessageProcessingService>();

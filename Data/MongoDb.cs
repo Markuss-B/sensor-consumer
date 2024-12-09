@@ -5,9 +5,9 @@ using MqttConsumer.Models;
 
 namespace MqttConsumer.Data;
 
-public class MongoDbContext
+public class MongoDb
 {
-    public MongoDbContext(IOptions<MongoDbSettings> options)
+    public MongoDb(IOptions<MongoDbSettings> options)
     {
         MongoDbSettings settings = options.Value;
         MongoClient client = new MongoClient(settings.ConnectionString);
@@ -15,10 +15,8 @@ public class MongoDbContext
 
         sensors = database.GetCollection<Sensor>("sensors");
         sensorMeasurements = database.GetCollection<SensorMeasurements>("sensorMeasurements");
-        sensorMeasurementsRaw = database.GetCollection<SensorMeasurementsRaw>("sensorMeasurementsRaw");
     }
 
     public IMongoCollection<Sensor> sensors { get; set; }
     public IMongoCollection<SensorMeasurements> sensorMeasurements { get; set; }
-    public IMongoCollection<SensorMeasurementsRaw> sensorMeasurementsRaw { get; set; }
 }

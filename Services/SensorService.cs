@@ -3,19 +3,20 @@ using MongoDB.Driver;
 using MqttConsumer.Data;
 using MqttConsumer.Models;
 using MQTTnet.Internal;
+using System.Reflection.Metadata;
 
 namespace MqttConsumer.Services;
 
 public class SensorService
 {
     private readonly ILogger<SensorService> _logger;
-    private readonly MongoDbContext _context;
+    private readonly MongoDb _db;
     private readonly InactiveSensorCache _inactiveSensorCache;
 
-    public SensorService(ILogger<SensorService> logger, MongoDbContext context, InactiveSensorCache inactiveSensorCache)
+    public SensorService(ILogger<SensorService> logger, MongoDb db, InactiveSensorCache inactiveSensorCache)
     {
         _logger = logger;
-        _context = context;
+        _db = db;
         _inactiveSensorCache = inactiveSensorCache;
     }
 
@@ -38,7 +39,7 @@ public class SensorService
         };
 
         // Insert the document into MongoDB
-        await _context.sensorMeasurements.InsertOneAsync(sensorMeasurement);
+        await _db.sensorMeasurements.InsertOneAsync(sensorMeasurement);
 
         _logger.LogInformation("Saved measurements for sensor with ID '{SensorId}' with timestamp '{Timestamp}'.", sensorId, timestamp);
     }
@@ -70,7 +71,7 @@ public class SensorService
         // Set the upsert option to true
         var updateOptions = new UpdateOptions { IsUpsert = true };
 
-        var result = await _context.sensors.UpdateOneAsync(filter, update, updateOptions);
+        var result = await _db.sensors.UpdateOneAsync(filter, update, updateOptions);
 
         if (result.UpsertedId != null)
         {
@@ -91,11 +92,12 @@ public class SensorService
         var filter = Builders<Sensor>.Filter.Eq(s => s.Id, sensorId);
         var update = Builders<Sensor>.Update
             .AddToSet(s => s.Topics, topic)
+            .Set(s => s.IsActive, true)
             .CurrentDate(s => s.LastUpdated);
 
         var updateOptions = new UpdateOptions { IsUpsert = true };
 
-        var result = await _context.sensors.UpdateOneAsync(filter, update, updateOptions);
+        var result = await _db.sensors.UpdateOneAsync(filter, update, updateOptions);
 
         if (result.UpsertedId != null)
         {
@@ -110,4 +112,4 @@ public class SensorService
             _logger.LogInformation("Successfully added topic '{Topic}' to sensor with ID '{SensorId}'.", topic, sensorId);
         }
     }
-}
+    }

@@ -65,8 +65,7 @@ public class SensorService
     {
         var filter = Builders<Sensor>.Filter.Eq(s => s.Id, sensorId);
         var update = Builders<Sensor>.Update
-            .Set(fieldName, newValue)
-            .CurrentDate(s => s.LastUpdated);
+            .Set(fieldName, newValue);
 
         // Set the upsert option to true
         var updateOptions = new UpdateOptions { IsUpsert = true };
@@ -91,9 +90,7 @@ public class SensorService
     {
         var filter = Builders<Sensor>.Filter.Eq(s => s.Id, sensorId);
         var update = Builders<Sensor>.Update
-            .AddToSet(s => s.Topics, topic)
-            .Set(s => s.IsActive, true)
-            .CurrentDate(s => s.LastUpdated);
+            .AddToSet(s => s.Topics, topic);
 
         var updateOptions = new UpdateOptions { IsUpsert = true };
 
@@ -112,4 +109,4 @@ public class SensorService
             _logger.LogInformation("Successfully added topic '{Topic}' to sensor with ID '{SensorId}'.", topic, sensorId);
         }
     }
-    }
+}

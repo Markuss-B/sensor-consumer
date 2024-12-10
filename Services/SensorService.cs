@@ -44,23 +44,6 @@ public class SensorService
         _logger.LogInformation("Saved measurements for sensor with ID '{SensorId}' with timestamp '{Timestamp}'.", sensorId, timestamp);
     }
 
-    //public async Task SaveMeasurementsRawAsync(string sensorId, string jsonString)
-    //{ 
-    //    var measurements = BsonDocument.Parse(jsonString);
-
-    //    // Create a SensorMeasurement object
-    //    var sensorMeasurementRaw = new SensorMeasurementsRaw
-    //    {
-    //        SensorId = sensorId,
-    //        Measurements = measurements
-    //    };
-
-    //    // Insert the document into MongoDB
-    //    await _context.sensorMeasurementsRaw.InsertOneAsync(sensorMeasurementRaw);
-
-    //    _logger.LogInformation("Saved raw measurements for sensor with ID '{SensorId}'.", sensorId);
-    //}
-
     public async Task UpdateSensorMetadataAsync(string sensorId, string fieldName, string newValue)
     {
         var filter = Builders<Sensor>.Filter.Eq(s => s.Id, sensorId);
@@ -71,6 +54,7 @@ public class SensorService
         var updateOptions = new UpdateOptions { IsUpsert = true };
 
         var result = await _db.sensors.UpdateOneAsync(filter, update, updateOptions);
+        await SaveMetadataHistory(sensorId, fieldName, newValue);
 
         if (result.UpsertedId != null)
         {
@@ -108,5 +92,22 @@ public class SensorService
         {
             _logger.LogInformation("Successfully added topic '{Topic}' to sensor with ID '{SensorId}'.", topic, sensorId);
         }
+    }
+
+    private async Task SaveMetadataHistory(string sensorId, string fieldName, string newValue)
+    {
+        var series = new SensorMetadatas
+        {
+            SensorId = sensorId,
+            Timestamp = DateTime.UtcNow,
+            Metadata = new BsonDocument
+            {
+                { fieldName, newValue }
+            }
+        };
+
+        await _db.sensorMetadatas.InsertOneAsync(series);
+
+        _logger.LogInformation("Saved metadata history for sensor with ID '{SensorId}' with field '{FieldName}' and value '{NewValue}'.", sensorId, fieldName, newValue);
     }
 }

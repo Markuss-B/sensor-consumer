@@ -1,7 +1,7 @@
 ﻿using MQTTnet.Formatter;
 using System.Security.Authentication;
 
-namespace MqttConsumer.Configuration;
+namespace SensorMonitoring.Consumer.Configuration;
 public class MqttSettings
 {
     public string Broker { get; set; }

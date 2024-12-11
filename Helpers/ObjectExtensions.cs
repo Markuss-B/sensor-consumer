@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace MqttConsumer.Helpers;
+namespace SensorMonitoring.Consumer.Helpers;
 
 internal static class ObjectExtensions
 {

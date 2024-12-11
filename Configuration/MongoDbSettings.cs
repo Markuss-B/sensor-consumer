@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MqttConsumer.Configuration;
+namespace SensorMonitoring.Consumer.Configuration;
 
 public class MongoDbSettings
 {

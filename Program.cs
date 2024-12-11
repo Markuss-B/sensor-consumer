@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Options;
-using MqttConsumer;
-using MqttConsumer.Configuration;
-using MqttConsumer.Configuration.Validators;
-using MqttConsumer.Data;
-using MqttConsumer.Services;
-using MqttConsumer.Workers;
+using SensorMonitoring.Consumer;
+using SensorMonitoring.Consumer.Configuration;
+using SensorMonitoring.Consumer.Configuration.Validators;
+using SensorMonitoring.Consumer.Data;
+using SensorMonitoring.Consumer.Services;
+using SensorMonitoring.Consumer.Workers;
 
 var builder = Host.CreateApplicationBuilder(args);
 

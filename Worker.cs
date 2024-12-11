@@ -1,17 +1,17 @@
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Formatter;
-using MqttConsumer.Helpers;
 using Microsoft.Extensions.Options;
 using System.Text;
 using System.Text.Json;
-using MqttConsumer.Services;
-using MqttConsumer.Configuration;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Authentication;
 using MQTTnet.Server;
+using SensorMonitoring.Consumer.Helpers;
+using SensorMonitoring.Consumer.Configuration;
+using SensorMonitoring.Consumer.Services;
 
-namespace MqttConsumer;
+namespace SensorMonitoring.Consumer;
 
 public class Worker : BackgroundService
 {

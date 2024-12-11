@@ -1,6 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
-using MqttConsumer.Models;
+using SensorMonitoring.Consumer.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MqttConsumer.Data;
+namespace SensorMonitoring.Consumer.Data;
 
 public class InactiveSensorCache
 {

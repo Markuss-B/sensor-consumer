@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace SensorMonitoring.Consumer.Models;
+namespace SensorConsumer.Models;
 
 public class SensorMeasurements
 {

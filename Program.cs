@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Options;
-using SensorMonitoring.Consumer;
-using SensorMonitoring.Consumer.Configuration;
-using SensorMonitoring.Consumer.Configuration.Validators;
-using SensorMonitoring.Consumer.Data;
-using SensorMonitoring.Consumer.Services;
-using SensorMonitoring.Consumer.Workers;
+using SensorConsumer;
+using SensorConsumer.Configuration;
+using SensorConsumer.Configuration.Validators;
+using SensorConsumer.Data;
+using SensorConsumer.Services;
+using SensorConsumer.Workers;
 
 var builder = Host.CreateApplicationBuilder(args);
 

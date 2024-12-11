@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using SensorMonitoring.Consumer.Configuration;
-using SensorMonitoring.Consumer.Models;
+using SensorConsumer.Configuration;
+using SensorConsumer.Models;
 
-namespace SensorMonitoring.Consumer.Data;
+namespace SensorConsumer.Data;
 
 public class MongoDb
 {

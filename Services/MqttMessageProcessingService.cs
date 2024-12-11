@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Options;
-using SensorMonitoring.Consumer.Models;
+using SensorConsumer.Models;
 using Newtonsoft.Json.Linq;
-using SensorMonitoring.Consumer.Configuration;
+using SensorConsumer.Configuration;
 
-namespace SensorMonitoring.Consumer.Services;
+namespace SensorConsumer.Services;
 
 public class MqttMessageProcessingService
 {

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SensorMonitoring.Consumer.Models;
+namespace SensorConsumer.Models;
 
 public class SensorMetadatas
 {

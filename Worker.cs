@@ -7,11 +7,11 @@ using System.Text.Json;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Authentication;
 using MQTTnet.Server;
-using SensorMonitoring.Consumer.Helpers;
-using SensorMonitoring.Consumer.Configuration;
-using SensorMonitoring.Consumer.Services;
+using SensorConsumer.Helpers;
+using SensorConsumer.Configuration;
+using SensorConsumer.Services;
 
-namespace SensorMonitoring.Consumer;
+namespace SensorConsumer;
 
 public class Worker : BackgroundService
 {

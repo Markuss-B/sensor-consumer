@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
-using SensorMonitoring.Consumer.Data;
-using SensorMonitoring.Consumer.Models;
+using SensorConsumer.Data;
+using SensorConsumer.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SensorMonitoring.Consumer.Workers;
+namespace SensorConsumer.Workers;
 
 public class InactiveSensorCacheWorker : BackgroundService
 {

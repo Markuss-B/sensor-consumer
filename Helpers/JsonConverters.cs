@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace SensorMonitoring.Consumer.Helpers;
+namespace SensorConsumer.Helpers;
 
 public class UnixTimestampConverter : JsonConverter<DateTime>
 {

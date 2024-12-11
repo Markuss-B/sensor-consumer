@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
+using SensorConsumer.Configuration;
 
-namespace SensorMonitoring.Consumer.Configuration.Validators;
+namespace SensorConsumer.Configuration.Validators;
 
 public class MqttSettingsValidation : IValidateOptions<MqttSettings>
 {

@@ -1,6 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
-using SensorMonitoring.Consumer.Models;
+using SensorConsumer.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SensorMonitoring.Consumer.Data;
+namespace SensorConsumer.Data;
 
 public class InactiveSensorCache
 {

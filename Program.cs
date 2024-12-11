@@ -22,6 +22,7 @@ builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("Mo
 
 builder.Services.AddSingleton<MongoDb>();
 builder.Services.AddSingleton<InactiveSensorCache>();
+builder.Services.AddSingleton<MqttService>();
 
 builder.Services.AddSingleton<MqttMessageProcessingService>();
 builder.Services.AddSingleton<SensorService>();

@@ -55,14 +55,17 @@ public class SensorService
         var updateOptions = new UpdateOptions { IsUpsert = true };
 
         var result = await _db.sensors.UpdateOneAsync(filter, update, updateOptions);
-        await SaveMetadataHistory(sensorId, fieldName, newValue);
 
         if (result.UpsertedId != null)
         {
+            // A new document was created
+            await SaveMetadataHistory(sensorId, fieldName, newValue);
             _logger.LogInformation("A new document was inserted with ID '{DocumentId}' and field '{FieldName}' with value '{NewValue}'.", result.UpsertedId, fieldName, newValue);
         }
-        else if (result.ModifiedCount == 0)
+        else if (result.ModifiedCount > 0)
         {
+            // An existing sensor was updated
+            await SaveMetadataHistory(sensorId, fieldName, newValue);
             _logger.LogInformation("Sensor with ID '{SensorId}' already had the same value for the field '{FieldName}'. No changes were made.", sensorId, fieldName);
         }
         else

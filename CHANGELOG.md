@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.0.0]
+- Release version 2.0.0 along side first releases to production for webapi, dashboard, courier.
 ### Added
 - Topic saving. Adds topics to sensor topic set.
 - Inactive sensor caching to avoid processing inactive sensors.

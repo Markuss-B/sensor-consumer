@@ -1,0 +1,27 @@
+name: sensor
+
+services:
+  consumer:
+    image: sensor-consumer-dev
+    # volumes:
+    #   - ../certs:/certs
+    networks:
+      - sensor-network
+    container_name: sensor-consumer-dev
+    environment:
+      MongoDbSettings__ConnectionString: mongodb://sensor-mongo-dev:27017/?directConnection=true
+      MongoDbSettings__DatabaseName: sensor-dev
+      MqttSettings__TopicFilter: Aranetest/#
+      MqttSettings__TopicSchema: rootTopic/baseSerial//sensorId
+      # MqttSettings__Broker: localhost
+      MqttSettings__Broker: broker.hivemq.com
+      MqttSettings__ProtocolVersion: V311
+      # MqttSettings__Username:
+      # MqttSettings__Password:
+      MqttSettings__UseTls: "false"
+      # MqttSettings__PathToPem: /certs/ca.pem
+      # MqttSettings__SslProtocol: Tls12
+
+networks:
+  sensor-network:
+    external: true

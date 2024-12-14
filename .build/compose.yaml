@@ -11,8 +11,7 @@ services:
     environment:
       MongoDbSettings__ConnectionString: mongodb://sensor-mongo-dev:27017/?directConnection=true
       MongoDbSettings__DatabaseName: sensor-dev
-      MqttSettings__TopicFilter: Aranetest/#
-      MqttSettings__TopicSchema: rootTopic/baseSerial//sensorId
+      MqttSettings__Topics: Aranetest/+/sensors/<sensorId>/json/measurements,Aranetest/+/sensors/<sensorId>/<metadataName>
       # MqttSettings__Broker: localhost
       MqttSettings__Broker: broker.hivemq.com
       MqttSettings__ProtocolVersion: V311

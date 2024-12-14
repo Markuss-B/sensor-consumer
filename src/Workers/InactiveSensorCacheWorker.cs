@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 
 namespace SensorConsumer.Workers;
 
+/// <summary>
+/// Worker to watch for changes in the sensors collection and update the inactive sensor cache.
+/// </summary>
 public class InactiveSensorCacheWorker : BackgroundService
 {
     private readonly ILogger<InactiveSensorCacheWorker> _logger;
@@ -24,6 +27,9 @@ public class InactiveSensorCacheWorker : BackgroundService
         _cache = inactiveSensorCache;
     }
 
+    /// <summary>
+    /// Load all inactive sensors from the database and start the worker.
+    /// </summary>
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Inactive sensor cache starting.");
@@ -37,11 +43,15 @@ public class InactiveSensorCacheWorker : BackgroundService
         await base.StartAsync(cancellationToken);
     }
 
+    /// <summary>
+    /// The worker watches for changes in the sensors collection and updates the inactive sensor cache.
+    /// </summary>
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Inactive sensor cache executing.");
 
         var col = _db.sensors;
+        // Only watch for updates where the isActive field is updated
         var options = new ChangeStreamOptions { FullDocument = ChangeStreamFullDocumentOption.UpdateLookup };
         var pipeline = new BsonDocument[]
         {
@@ -54,8 +64,10 @@ public class InactiveSensorCacheWorker : BackgroundService
             {
                 _logger.LogInformation("Watching for changes in the sensors collection.");
 
+                // Watch for changes in the sensors collection
                 using var cursor = await col.WatchAsync<ChangeStreamDocument<Sensor>>(pipeline, options, cancellationToken);
 
+                // For every change detected, update the cache
                 await cursor.ForEachAsync(change =>
                 {
                     _logger.LogInformation("Change detected: {Change}", change);
@@ -90,6 +102,9 @@ public class InactiveSensorCacheWorker : BackgroundService
         _logger.LogInformation("Inactive sensor cache execution stopped.");
     }
 
+    /// <summary>
+    /// Clear the cache when the worker is stopped.
+    /// </summary>
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         _cache.Clear();

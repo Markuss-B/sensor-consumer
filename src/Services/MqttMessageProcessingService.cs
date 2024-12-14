@@ -2,6 +2,7 @@
 using SensorConsumer.Models;
 using Newtonsoft.Json.Linq;
 using SensorConsumer.Configuration;
+using MongoDB.Bson;
 
 namespace SensorConsumer.Services;
 
@@ -10,22 +11,29 @@ public class MqttMessageProcessingService
     private readonly ILogger<MqttMessageProcessingService> _logger;
     private readonly SensorService _sensorService;
 
-    private readonly string[] _topicSchema;
+    private readonly List<TopicSchema> _topicSchemas;
     private readonly int _sensorIdPosition;
 
     public MqttMessageProcessingService(ILogger<MqttMessageProcessingService> logger, SensorService sensorService, IOptions<MqttSettings> options)
     {
         _logger = logger;
         _sensorService = sensorService;
-        _topicSchema = options.Value.SplitTopicSchema;
-        _sensorIdPosition = options.Value.SensorIdPosition;
+        _topicSchemas = options.Value.TopicSchemas;
     }
 
     // Main method that receives the message and delegates to the appropriate handler
     public async Task ProcessMessageAsync(string topic, string payload)
     {
+        // Find a TopicSchema that matches the topic
+        TopicSchema? schema = MatchTopicSchema(topic);
+        if (schema == null) {
+            _logger.LogInformation("No matching schema found for topic: {topic}", topic);
+            return;
+        }
+
+        // Split the topic into parts to extract the sensorId
         string[] topicParts = topic.Split('/');
-        string sensorId = topicParts[_sensorIdPosition];
+        string sensorId = topicParts[schema.SensorIdPosition];
 
         if (_sensorService.IsSensorInactive(sensorId))
         {
@@ -33,20 +41,14 @@ public class MqttMessageProcessingService
             return;
         }
 
-        string payloadType = topicParts.Last();
-
         List<Task> tasks = [];
 
         tasks.Add(HandleTopic(sensorId, topic));
 
-        // Use a switch expression to route to the appropriate handler
-        var handlerTask = payloadType switch
+        var handlerTask = schema.TopicType switch
         {
-            "measurements" => HandleMeasurementsAsync(sensorId, payload),
-            "name" => HandleSensorMetadataAsync(sensorId, payload, "name"),
-            "productNumber" => HandleSensorMetadataAsync(sensorId, payload, "productNumber"),
-            "group" => HandleSensorMetadataAsync(sensorId, payload, "group"),
-            "groupId" => HandleSensorMetadataAsync(sensorId, payload, "groupId"),
+            TopicType.Measurements => HandleMeasurementsAsync(sensorId, payload),
+            TopicType.Metadata => HandleSensorMetadataAsync(sensorId, payload, topicParts[schema.MetadataNamePosition]),
             _ => null
         };
 
@@ -55,56 +57,40 @@ public class MqttMessageProcessingService
         else
             tasks.Add(handlerTask);
 
+        // The handler methods process and save the data to the database
         await Task.WhenAll(tasks);
     }
 
+    /// <summary>
+    /// Handles sensor topics.
+    /// </summary>
     private async Task HandleTopic(string sensorId, string topic)
     {
-        var tasks = new List<Task>();
+        await _sensorService.UpdateSensorTopicsAsync(sensorId, topic);
+    }
 
-        tasks.Add(_sensorService.UpdateSensorTopicsAsync(sensorId, topic));
-
-        string[] topicParts = topic.Split('/');
-
-        for (int i = 0; i < _topicSchema.Length; i++)
-        {
-            string topicPart = topicParts[i];
-            string schemaPart = _topicSchema[i];
-
-            // We have reached the sensorId part of the topic we don't care about the rest
-            if (schemaPart == "sensorId")
-                break;
-
-            // If the schema part is empty we don't care about it
-            if (string.IsNullOrEmpty(schemaPart))
-                continue;
-
-            // named parts in schema get saved as metadata
-            // update sensor where field is schemaPart and value is topicPart
-            tasks.Add(_sensorService.UpdateSensorMetadataAsync(sensorId, schemaPart, topicPart));
-        }
-
-        await Task.WhenAll(tasks);
+    /// <summary>
+    /// Handles sensor metadata. Topics like: Aranetest/394260700033/sensors/3002FA/name
+    /// </summary>
+    private async Task HandleSensorMetadataAsync(string sensorId, string payload, string metadataType)
+    {
+        await _sensorService.UpdateSensorMetadataAsync(sensorId, metadataType, payload);
     }
 
     /// <summary>
     /// Handles measurments. Topics like: Aranetest/394260700033/sensors/3002FA/json/measurements
     /// </summary>
     /// <param name="topic">Measurment topic</param>
-    /// <param name="payload">Measurment payload - json string containing measurments like co2, temperature, battery.</param>
+    /// <param name="payload">Measurment payload - json string containing measurments like { "time": 1630512000, "temperature": 23.5, "time": "1630512000", }</param>
     /// <returns></returns>
     private async Task HandleMeasurementsAsync(string sensorId, string payload)
     {
-        var tasks = new List<Task>();
-
-        JObject jsonDocument = JObject.Parse(payload);
-
-        //tasks.Add(_sensorService.SaveMeasurementsRawAsync(sensorId, jsonDocument.ToString()));
+        BsonDocument bsonElements = BsonDocument.Parse(payload);
 
         long unixTime;
         DateTime timestamp;
 
-        if (jsonDocument.TryGetValue("time", out JToken timeToken) && long.TryParse(timeToken.ToString(), out unixTime))
+        if (bsonElements.TryGetValue("time", out BsonValue timeToken) && long.TryParse(timeToken.ToString(), out unixTime))
         {
             int unixTimeLength = unixTime.ToString().Length;
             if (unixTimeLength == 10)
@@ -121,7 +107,7 @@ public class MqttMessageProcessingService
                 return;
             }
 
-            jsonDocument.Remove("time");
+            bsonElements.Remove("time");
         }
         else
         {
@@ -129,16 +115,18 @@ public class MqttMessageProcessingService
             return;
         }
 
-        string jsonString = jsonDocument.ToString();
-
-        tasks.Add(_sensorService.SaveMeasurementsAsync(sensorId, timestamp, jsonString));
-
-        await Task.WhenAll(tasks);
+        List<Task> tasks = new List<Task>();
+        await _sensorService.SaveMeasurementsAsync(sensorId, timestamp, bsonElements);
     }
 
-    // Generic handler for sensor metadata
-    private async Task HandleSensorMetadataAsync(string sensorId, string payload, string metadataType)
+    private TopicSchema? MatchTopicSchema(string topic)
     {
-        await _sensorService.UpdateSensorMetadataAsync(sensorId, metadataType, payload);
+        foreach (var schema in _topicSchemas)
+        {
+            if (MQTTnet.MqttTopicFilterComparer.Compare(topic, schema.TopicFilter) == MQTTnet.MqttTopicFilterCompareResult.IsMatch)
+                return schema;
+        }
+
+        return null;
     }
 }

@@ -150,7 +150,7 @@ public class MqttWorker : BackgroundService
     /// </summary>
     private async Task SubscribeToTopics()
     {
-        string[] topics = _settings.TopicFilter.Split(',');
+        string[] topics = _settings.TopicSchemas.Select(s => s.TopicFilter).ToArray();
 
         if (topics.Length == 0)
         {

@@ -3,23 +3,20 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace SensorConsumer.Models;
 
+[BsonIgnoreExtraElements]
 public class Sensor
 {
     [BsonId]
     public string Id { get; set; } // Unique ID for the sensor
     [BsonElement("topics")]
     public HashSet<string> Topics { get; set; } // List of topics for the sensor
-    [BsonElement("name")]
-    public string? Name { get; set; } // Sensor name
-    [BsonElement("productNumber")]
-    public string? ProductNumber { get; set; } // Product number of the sensor
-    [BsonElement("group")]
-    public string? Group { get; set; } // Group identifier for the sensor
-    [BsonElement("groupId")]
-    public string? GroupId { get; set; } // Group ID of the sensor
     [BsonElement("isActive")]
     public bool IsActive { get; set; } // Flag indicating if sensor messages should be processed
-    [BsonExtraElements]
-    public BsonDocument? ExtraElements { get; set; } // Additional fields that are not mapped to properties
+    [BsonElement("metadata")]
+    public BsonDocument Metadata { get; set; } // Metadata for the sensor
+    [BsonElement("latestMeasurementTimestamp")]
+    public DateTime LatestMeasurementTimestamp { get; set; } // Timestamp of the last measurement
+    [BsonElement("latestMeasurements")]
+    public BsonDocument LatestMeasurements { get; set; } // Timestamp of the last measurement
 }
 

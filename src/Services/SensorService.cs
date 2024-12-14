@@ -21,16 +21,21 @@ public class SensorService
         _inactiveSensorCache = inactiveSensorCache;
     }
 
+    /// <summary>
+    /// Check if the inactive sensor cache contains the sensor.
+    /// </summary>
     public bool IsSensorInactive(string sensorId)
     {
         return _inactiveSensorCache.IsSensorInactive(sensorId);
     }
 
-    public async Task SaveMeasurementsAsync(string sensorId, DateTime timestamp, string jsonString)
+    /// <summary>
+    /// Save the measurements to the database:
+    /// Saves the measurements to the <see cref="MongoDb.sensorMeasurements"/> collection and 
+    /// the sensor document in <see cref="MongoDb.sensors"/> collection with the latest measurements.
+    /// </summary>
+    public async Task SaveMeasurementsAsync(string sensorId, DateTime timestamp, BsonDocument measurements)
     {
-        // Convert the JSON data into a BsonDocument
-        var measurements = BsonDocument.Parse(jsonString);
-
         // Create a SensorMeasurement object
         var sensorMeasurement = new SensorMeasurements
         {
@@ -39,41 +44,26 @@ public class SensorService
             Measurements = measurements
         };
 
-        // Insert the document into MongoDB
-        await _db.sensorMeasurements.InsertOneAsync(sensorMeasurement);
+        List<Task> tasks = new();
+        // Insert the measurements into the sensorMeasurements collection
+        tasks.Add(_db.sensorMeasurements.InsertOneAsync(sensorMeasurement));
+
+        // Update the sensor document with the latest measurements
+        var filter = Builders<Sensor>.Filter.Eq(s => s.Id, sensorId);
+        var update = Builders<Sensor>.Update
+            .Set(s => s.LatestMeasurements, measurements)
+            .Set(s => s.LatestMeasurementTimestamp, timestamp);
+
+        tasks.Add(_db.sensors.UpdateOneAsync(filter, update));
+
+        await Task.WhenAll(tasks);
 
         _logger.LogInformation("Saved measurements for sensor with ID '{SensorId}' with timestamp '{Timestamp}'.", sensorId, timestamp);
     }
 
-    public async Task UpdateSensorMetadataAsync(string sensorId, string fieldName, string newValue)
-    {
-        var filter = Builders<Sensor>.Filter.Eq(s => s.Id, sensorId);
-        var update = Builders<Sensor>.Update
-            .Set(fieldName, newValue);
-
-        // Set the upsert option to true
-        var updateOptions = new UpdateOptions { IsUpsert = true };
-
-        var result = await _db.sensors.UpdateOneAsync(filter, update, updateOptions);
-
-        if (result.UpsertedId != null)
-        {
-            // A new document was created
-            await SaveMetadataHistory(sensorId, fieldName, newValue);
-            _logger.LogInformation("A new document was inserted with ID '{DocumentId}' and field '{FieldName}' with value '{NewValue}'.", result.UpsertedId, fieldName, newValue);
-        }
-        else if (result.ModifiedCount > 0)
-        {
-            // An existing sensor was updated
-            await SaveMetadataHistory(sensorId, fieldName, newValue);
-            _logger.LogInformation("Sensor with ID '{SensorId}' already had the same value for the field '{FieldName}'. No changes were made.", sensorId, fieldName);
-        }
-        else
-        {
-            _logger.LogInformation("Successfully updated sensor with ID '{SensorId}' and field '{FieldName}' to '{NewValue}'.", sensorId, fieldName, newValue);
-        }
-    }
-
+    /// <summary>
+    /// Update the sensor topics of the sensor.
+    /// </summary>
     public async Task UpdateSensorTopicsAsync(string sensorId, string topic)
     {
         var filter = Builders<Sensor>.Filter.Eq(s => s.Id, sensorId);
@@ -95,6 +85,40 @@ public class SensorService
         else
         {
             _logger.LogInformation("Successfully added topic '{Topic}' to sensor with ID '{SensorId}'.", topic, sensorId);
+        }
+    }
+
+    /// <summary>
+    /// Update the sensor metadata:
+    /// Saves the metadata to the the sensor document in <see cref="MongoDb.sensors"/> collection
+    /// and if the metadata is new, adds it to the <see cref="MongoDb.sensorMetadatas"/> collection to keep a history of the metadata changes.
+    /// </summary>
+    public async Task UpdateSensorMetadataAsync(string sensorId, string fieldName, string newValue)
+    {
+        var filter = Builders<Sensor>.Filter.Eq(s => s.Id, sensorId);
+        var update = Builders<Sensor>.Update
+            .Set(s => s.Metadata[fieldName], newValue);
+
+        // Set the upsert option to true
+        var updateOptions = new UpdateOptions { IsUpsert = true };
+
+        var result = await _db.sensors.UpdateOneAsync(filter, update, updateOptions);
+
+        if (result.UpsertedId != null)
+        {
+            // A new document was created
+            await SaveMetadataHistory(sensorId, fieldName, newValue);
+            _logger.LogInformation("A new document was inserted with ID '{DocumentId}' and field '{FieldName}' with value '{NewValue}'.", result.UpsertedId, fieldName, newValue);
+        }
+        else if (result.ModifiedCount > 0)
+        {
+            // An existing sensor was updated
+            await SaveMetadataHistory(sensorId, fieldName, newValue);
+            _logger.LogInformation("Sensor with ID '{SensorId}' already had the same value for the field '{FieldName}'. No changes were made.", sensorId, fieldName);
+        }
+        else
+        {
+            _logger.LogInformation("Successfully updated sensor with ID '{SensorId}' and field '{FieldName}' to '{NewValue}'.", sensorId, fieldName, newValue);
         }
     }
 

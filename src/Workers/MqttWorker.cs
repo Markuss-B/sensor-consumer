@@ -22,7 +22,6 @@ public class MqttWorker : BackgroundService
 {
     private readonly ILogger<MqttWorker> _logger;
     private readonly IMqttClient _client;
-    private readonly MqttFactory _factory;
 
     private readonly MqttSettings _settings;
     private readonly MqttClientOptions _options;
@@ -33,10 +32,10 @@ public class MqttWorker : BackgroundService
     public MqttWorker(ILogger<MqttWorker> logger, IOptions<MqttSettings> options, MqttMessageProcessingService processingService)
     {
         _logger = logger;
-        _factory = new MqttFactory();
         _settings = options.Value;
         _options = ConfigureOptions(_settings);
-        _client = _factory.CreateMqttClient();
+        var factory = new MqttFactory();
+        _client = factory.CreateMqttClient();
         _processingService = processingService;
     }
 

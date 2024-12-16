@@ -2,7 +2,7 @@ name: sensor
 
 services:
   consumer:
-    image: sensor-consumer-dev
+    build: ../  
     # volumes:
     #   - ../certs:/certs
     networks:
@@ -20,6 +20,31 @@ services:
       MqttSettings__UseTls: "false"
       # MqttSettings__PathToPem: /certs/ca.pem
       # MqttSettings__SslProtocol: Tls12
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    container_name: sensor-mongo-dev
+    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    ports:
+      - 127.0.0.1:27017:27017
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'host.docker.internal:27017'}]}) }" | mongosh --port 27017 --quiet
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      start_interval: 1s
+      retries: 30
+    volumes:
+      - "sensor-mongo-dev-data:/data/db"
+    networks:
+      - sensor-network
+
+volumes:
+  sensor-mongo-dev-data:
 
 networks:
   sensor-network:

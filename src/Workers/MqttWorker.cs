@@ -20,10 +20,10 @@ public class MqttWorker : BackgroundService
     private readonly MqttSettings _settings;
     private readonly MqttClientOptions _options;
 
-    private readonly MqttMessageProcessingService _processingService;
+    private readonly ProcessingService _processingService;
     private int _messageCount = 0;
 
-    public MqttWorker(ILogger<MqttWorker> logger, IOptions<MqttSettings> options, MqttMessageProcessingService processingService)
+    public MqttWorker(ILogger<MqttWorker> logger, IOptions<MqttSettings> options, ProcessingService processingService)
     {
         _logger = logger;
         _settings = options.Value;

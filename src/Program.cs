@@ -24,7 +24,7 @@ builder.Services.AddSingleton<MongoDb>();
 builder.Services.AddSingleton<InactiveSensorCache>();
 
 // Services
-builder.Services.AddSingleton<MqttMessageProcessingService>();
+builder.Services.AddSingleton<ProcessingService>();
 builder.Services.AddSingleton<SensorService>();
 
 // Workers

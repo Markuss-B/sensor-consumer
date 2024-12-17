@@ -4,15 +4,14 @@ using SensorConsumer.Configuration;
 
 namespace SensorConsumer.Services;
 
-public class MqttMessageProcessingService
+public class ProcessingService
 {
-    private readonly ILogger<MqttMessageProcessingService> _logger;
+    private readonly ILogger<ProcessingService> _logger;
     private readonly SensorService _sensorService;
 
     private readonly List<TopicSchema> _topicSchemas;
-    private readonly int _sensorIdPosition;
 
-    public MqttMessageProcessingService(ILogger<MqttMessageProcessingService> logger, SensorService sensorService, IOptions<MqttSettings> options)
+    public ProcessingService(ILogger<ProcessingService> logger, SensorService sensorService, IOptions<MqttSettings> options)
     {
         _logger = logger;
         _sensorService = sensorService;

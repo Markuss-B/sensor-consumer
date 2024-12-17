@@ -1,5 +1,4 @@
 ﻿using MQTTnet.Formatter;
-using SensorConsumer.Models;
 using System.Security.Authentication;
 
 namespace SensorConsumer.Configuration;

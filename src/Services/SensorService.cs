@@ -1,10 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
-using SensorConsumer.Models;
-using MQTTnet.Internal;
-using System.Reflection.Metadata;
-using SensorConsumer.Models;
 using SensorConsumer.Data;
+using SensorConsumer.Models;
 
 namespace SensorConsumer.Services;
 

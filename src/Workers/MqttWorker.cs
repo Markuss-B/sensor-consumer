@@ -1,17 +1,11 @@
-﻿using MQTTnet.Client;
+﻿using Microsoft.Extensions.Options;
 using MQTTnet;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
+using MQTTnet.Client;
 using SensorConsumer.Configuration;
-using System.Security.Cryptography.X509Certificates;
-using System.Net.Security;
-using MQTTnet.Packets;
 using SensorConsumer.Helpers;
 using SensorConsumer.Services;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 
 namespace SensorConsumer.Workers;
 

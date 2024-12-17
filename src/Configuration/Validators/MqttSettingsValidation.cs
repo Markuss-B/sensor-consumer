@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Options;
-using SensorConsumer.Configuration;
 
 namespace SensorConsumer.Configuration.Validators;
 
@@ -17,7 +16,8 @@ public class MqttSettingsValidation : IValidateOptions<MqttSettings>
         string[] topics = options.Topics.Split(',');
 
         List<TopicSchema> schemas = new();
-        foreach (string topic in topics) {
+        foreach (string topic in topics)
+        {
             string[] topicParts = topic.Split('/');
             TopicSchema schema = new()
             {

@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
-using SensorConsumer.Models;
-using Newtonsoft.Json.Linq;
-using SensorConsumer.Configuration;
 using MongoDB.Bson;
+using SensorConsumer.Configuration;
 
 namespace SensorConsumer.Services;
 
@@ -26,7 +24,8 @@ public class MqttMessageProcessingService
     {
         // Find a TopicSchema that matches the topic
         TopicSchema? schema = MatchTopicSchema(topic);
-        if (schema == null) {
+        if (schema == null)
+        {
             _logger.LogInformation("No matching schema found for topic: {topic}", topic);
             return;
         }

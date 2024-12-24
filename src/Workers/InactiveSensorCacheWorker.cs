@@ -58,7 +58,7 @@ public class InactiveSensorCacheWorker : BackgroundService
             {
                 _logger.LogInformation("Watching for changes in the sensors collection.");
 
-                // Watch for changes in the sensors collection
+                // Opens the changestream
                 using var cursor = await col.WatchAsync<ChangeStreamDocument<Sensor>>(pipeline, options, cancellationToken);
 
                 // For every change detected, update the cache

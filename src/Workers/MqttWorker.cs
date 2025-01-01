@@ -58,7 +58,7 @@ public class MqttWorker : BackgroundService
                     await Connect(cancellationToken);
                 }
 
-                _logger.LogInformation("MQTT connection is alive.");
+                _logger.LogInformation("MQTT connection is alive.");    
             }
             catch (Exception ex)
             {
@@ -89,7 +89,7 @@ public class MqttWorker : BackgroundService
             {
                 try
                 {
-                    _logger.LogInformation("Received message. Message count: {messageNumber}", e.ApplicationMessage.Topic, messageNumber);
+                    _logger.LogInformation("Received message. Message count: {messageNumber}", messageNumber);
 
                     if (_logger.IsEnabled(LogLevel.Debug))
                         _logger.LogDebug("Message: {message};Payload: {payload}", e.ToJsonString(), e.ApplicationMessage.ConvertPayloadToString());
@@ -120,10 +120,10 @@ public class MqttWorker : BackgroundService
         {
             try
             {
-                _logger.LogInformation("Connecting to MQTT broker: {broker}", _settings.Broker);
+                _logger.LogInformation("Connecting to MQTT broker: {broker}.", _settings.Broker);
 
                 await _client.ConnectAsync(_options, cancellationToken);
-                _logger.LogInformation("Connected to MQTT broker");
+                _logger.LogInformation("Connected to MQTT broker: {broker}.", _settings.Broker);
 
                 await SubscribeToTopics();
                 _logger.LogInformation("Subscribed to topics");
@@ -154,7 +154,7 @@ public class MqttWorker : BackgroundService
         foreach (var topic in topics)
         {
             await _client.SubscribeAsync(topic);
-            _logger.LogDebug("Subscribed to topic: {topic}", topic);
+            _logger.LogInformation("Subscribed to topic: {topic}", topic);
         }
     }
 

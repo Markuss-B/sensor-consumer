@@ -35,7 +35,7 @@ public class MqttSettingsValidation : IValidateOptions<MqttSettings>
             // replace the placeholders with the actual values
             schema.TopicFilter = schema.TopicFilter.Replace("<sensorId>", "+");
 
-            if (topic.Contains("measurements"))
+            if (!topic.Contains("<metadataName>"))
             {
                 schema.TopicType = TopicType.Measurements;
             }

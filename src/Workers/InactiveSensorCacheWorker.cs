@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
 using SensorConsumer.Data;
+using SensorConsumer.Helpers;
 using SensorConsumer.Models;
 
 namespace SensorConsumer.Workers;
@@ -47,10 +48,9 @@ public class InactiveSensorCacheWorker : BackgroundService
         var col = _db.sensors;
         // Only watch for updates where the isActive field is updated
         var options = new ChangeStreamOptions { FullDocument = ChangeStreamFullDocumentOption.UpdateLookup };
-        var pipeline = new BsonDocument[]
-        {
-                new BsonDocument("$match", new BsonDocument("updateDescription.updatedFields.isActive", new BsonDocument("$exists", true)))
-        };
+
+        var pipeline = new EmptyPipelineDefinition<ChangeStreamDocument<Sensor>>()
+            .Match("{ $or: [ { operationType: 'update', 'updateDescription.updatedFields.isActive': { $exists: true } }, { operationType: 'replace' } ] }");
 
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -64,20 +64,17 @@ public class InactiveSensorCacheWorker : BackgroundService
                 // For every change detected, update the cache
                 await cursor.ForEachAsync(change =>
                 {
-                    _logger.LogInformation("Change detected: {Change}", change);
-                    if (change.OperationType == ChangeStreamOperationType.Update)
-                    {
-                        var sensorId = change.FullDocument.Id;
-                        var isActive = change.FullDocument.IsActive;
+                    _logger.LogInformation("Change detected: {Change}", change.ToJsonString());
+                    var sensorId = change.FullDocument.Id;
+                    var isActive = change.FullDocument.IsActive;
 
-                        if (isActive)
-                        {
-                            _cache.RemoveInactiveSensor(sensorId);
-                        }
-                        else
-                        {
-                            _cache.AddInactiveSensor(sensorId);
-                        }
+                    if (isActive)
+                    {
+                        _cache.RemoveInactiveSensor(sensorId);
+                    }
+                    else
+                    {
+                        _cache.AddInactiveSensor(sensorId);
                     }
                 }, cancellationToken);
             }

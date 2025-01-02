@@ -16,11 +16,5 @@
 - Ignores inactive sensors marked by 'isActive' field which is managed by web project.
 - Keeps a cache of ignored sensors which is tracked by mongo change streams.
 
-# Docker setup
-Build image: `docker build -t sensor-consumer .`
-
-If you want to get the image file, you can use the following command:
-`docker save sensor-consumer > sensor-consumer.tar`
-
-# Setup
-- TODO: Add setup instructions
+# Local Docker setup
+Check [.build folder](.build/)

@@ -1,7 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
 using SensorConsumer.Data;
-using SensorConsumer.Helpers;
 using SensorConsumer.Models;
 
 namespace SensorConsumer.Workers;

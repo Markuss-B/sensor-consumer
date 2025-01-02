@@ -5,6 +5,9 @@ using SensorConsumer.Models;
 
 namespace SensorConsumer.Data;
 
+/// <summary>
+/// Class to handle MongoDB connections and collections.
+/// </summary>
 public class MongoDb
 {
     public MongoDb(IOptions<MongoDbSettings> options)

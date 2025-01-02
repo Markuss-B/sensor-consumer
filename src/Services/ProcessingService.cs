@@ -4,6 +4,9 @@ using SensorConsumer.Configuration;
 
 namespace SensorConsumer.Services;
 
+/// <summary>
+/// Service to process incoming MQTT messages.
+/// </summary>
 public class ProcessingService
 {
     private readonly ILogger<ProcessingService> _logger;

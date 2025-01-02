@@ -2,6 +2,9 @@
 
 namespace SensorConsumer.Data;
 
+/// <summary>
+/// Cache for inactive sensors.
+/// </summary>
 public class InactiveSensorCache
 {
     private readonly ILogger<InactiveSensorCache> _logger;

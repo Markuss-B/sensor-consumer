@@ -14,6 +14,7 @@ var config = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
+// Configurations
 builder.Services.Configure<MqttSettings>(builder.Configuration.GetSection("MqttSettings"));
 builder.Services.AddSingleton<IValidateOptions<MqttSettings>, MqttSettingsValidation>();
 

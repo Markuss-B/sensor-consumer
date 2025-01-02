@@ -5,6 +5,9 @@ using SensorConsumer.Models;
 
 namespace SensorConsumer.Services;
 
+/// <summary>
+/// Service to handle sensor data. Saves sensor measurements and metadata to the MongoDB database.
+/// </summary>
 public class SensorService
 {
     private readonly ILogger<SensorService> _logger;
@@ -96,7 +99,7 @@ public class SensorService
         var update = Builders<Sensor>.Update
             .Set(s => s.Metadata[fieldName], newValue);
 
-        // Set the upsert option to true
+        // Upsert so that a new document is created if the sensor does not exist
         var updateOptions = new UpdateOptions { IsUpsert = true };
 
         var result = await _db.sensors.UpdateOneAsync(filter, update, updateOptions);

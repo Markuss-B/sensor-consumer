@@ -58,7 +58,7 @@ public class MqttWorker : BackgroundService
                     await Connect(cancellationToken);
                 }
 
-                _logger.LogInformation("MQTT connection is alive.");    
+                _logger.LogInformation("MQTT connection is alive.");
             }
             catch (Exception ex)
             {
@@ -78,13 +78,18 @@ public class MqttWorker : BackgroundService
         await base.StopAsync(cancellationToken);
     }
 
+    /// <summary>
+    /// Handles the received message by processing it and acknowledging it.
+    /// </summary>
     private async Task HandleReceivedMessage(CancellationToken cancellationToken, MqttApplicationMessageReceivedEventArgs e)
     {
         e.AutoAcknowledge = false;
         int messageNumber = _messageCount++;
 
+        // Create the processing task
         async Task ProcessAsync()
         {
+            // Create a logger scope for message
             using (_logger.BeginScope("Message number {messageNumber}, Topic: {topic}", messageNumber, e.ApplicationMessage.Topic))
             {
                 try
@@ -94,7 +99,9 @@ public class MqttWorker : BackgroundService
                     if (_logger.IsEnabled(LogLevel.Debug))
                         _logger.LogDebug("Message: {message};Payload: {payload}", e.ToJsonString(), e.ApplicationMessage.ConvertPayloadToString());
 
+                    // Process the message
                     await _processingService.ProcessMessageAsync(e.ApplicationMessage.Topic, e.ApplicationMessage.ConvertPayloadToString());
+                    // Acknowledge the message
                     await e.AcknowledgeAsync(cancellationToken);
 
                     _logger.LogInformation("Processed message number {messageNumber}.", messageNumber);
@@ -106,6 +113,7 @@ public class MqttWorker : BackgroundService
             }
         }
 
+        // Run the processing task
         _ = Task.Run(ProcessAsync, cancellationToken);
     }
 
@@ -168,6 +176,7 @@ public class MqttWorker : BackgroundService
             .WithProtocolVersion(settings.ProtocolVersion)
             .WithCredentials(settings.Username, settings.Password);
 
+        // Configure TLS options if needed
         if (settings.UseTls)
         {
             X509Certificate2Collection certificates = new();

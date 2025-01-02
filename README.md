@@ -16,7 +16,7 @@ Check [.build folder](.build/)
 - Configurable topics in appsettings. Ex. 'Aranet/+/sensors/<sensorId>/json/measurements'.
 - Async message processing.
 - Extracts 'time' field from JSON and converts it to datetime to use as timestamp for measurement timeseries.
-- Identifies Aranet metadata topics like 'Aranet/<baseSationId>/sensors/<sensorId>/name', 'group' and saves metadata to database.
+- Identifies Aranet metadata topics with cinfigured topic 'Aranet/+/sensors/<sensorId>/<metadataName>'.
 - Saves metadata to actual sensor and metadata history collections.
 - Tracable logs by message log context.
 - Docker container setup.

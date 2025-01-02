@@ -1,3 +1,13 @@
+## Part of Sensor Monitoring System
+- [sensor-consumer](https://github.com/Markuss-B/sensor-consumer)
+- [sensor-webapi](https://github.com/Markuss-B/sensor-webapi)
+- [sensor-dashboard](https://github.com/Markuss-B/sensor-dashboard)
+- [sensor-notifications](https://github.com/Markuss-B/sensor-notifications)
+- [sensor-courier](https://github.com/Markuss-B/sensor-courier)
+
+## Local Docker setup
+Check [.build folder](.build/)
+
 # MQTT consumer for LU Aranet sensor data.
 
 # Features
@@ -12,9 +22,6 @@
 - Tracable logs by message log context.
 - Docker container setup.
 
-## Web integration by sensor-webapi and sensor-webapp
+## Web integration by sensor-webapi and sensor-dashboard
 - Ignores inactive sensors marked by 'isActive' field which is managed by web project.
 - Keeps a cache of ignored sensors which is tracked by mongo change streams.
-
-# Local Docker setup
-Check [.build folder](.build/)

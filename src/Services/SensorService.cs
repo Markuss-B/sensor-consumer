@@ -111,11 +111,11 @@ public class SensorService
         {
             // An existing sensor was updated
             await SaveMetadataHistory(sensorId, fieldName, newValue);
-            _logger.LogInformation("Sensor with ID '{SensorId}' already had the same value for the field '{FieldName}'. No changes were made.", sensorId, fieldName);
+            _logger.LogInformation("Successfully updated sensor with ID '{SensorId}' and field '{FieldName}' to '{NewValue}'.", sensorId, fieldName, newValue);
         }
         else
         {
-            _logger.LogInformation("Successfully updated sensor with ID '{SensorId}' and field '{FieldName}' to '{NewValue}'.", sensorId, fieldName, newValue);
+            _logger.LogInformation("Sensor with ID '{SensorId}' already had the same value for the field '{FieldName}'. No changes were made.", sensorId, fieldName);
         }
     }
 

@@ -64,7 +64,7 @@ public class InactiveSensorCacheWorker : BackgroundService
                 // For every change detected, update the cache
                 await cursor.ForEachAsync(change =>
                 {
-                    _logger.LogInformation("Change detected: {Change}", change.ToJsonString());
+                    _logger.LogInformation("Change detected: {Change}", change.FullDocument.ToJson());
                     var sensorId = change.FullDocument.Id;
                     var isActive = change.FullDocument.IsActive;
 

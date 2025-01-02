@@ -13,9 +13,8 @@ Check [.build folder](.build/)
 # Features
 - Listens to MQTT broker for sensor data and saves it to MongoDB.
 - Configurable connection settings in appsettings for MQTT broker and MongoDB.
-- Configurable topics in appsettings. Ex. 'Aranet/#'.
+- Configurable topics in appsettings. Ex. 'Aranet/+/sensors/<sensorId>/json/measurements'.
 - Async message processing.
-- Identifies sensor measurements in JSON format on topics ending with '/measurements/'. Ex. 'Aranet/<baseSationId>/sensors/<sensorId>/json/measurements/'
 - Extracts 'time' field from JSON and converts it to datetime to use as timestamp for measurement timeseries.
 - Identifies Aranet metadata topics like 'Aranet/<baseSationId>/sensors/<sensorId>/name', 'group' and saves metadata to database.
 - Saves metadata to actual sensor and metadata history collections.

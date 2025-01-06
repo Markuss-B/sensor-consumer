@@ -10,7 +10,7 @@ docker compose up -d
 
 You might need to create the docker network
 ```
-docker network create sensor-consumer
+docker network create sensor-network
 ```
 
 To see logs use docker desktop or run the following command.

@@ -18,7 +18,7 @@ Check [.build folder](.build/)
 - Extracts 'time' field from JSON and converts it to datetime to use as timestamp for measurement timeseries.
 - Identifies Aranet metadata topics with cinfigured topic 'Aranet/+/sensors/<sensorId>/<metadataName>'.
 - Saves metadata to actual sensor and metadata history collections.
-- Tracable logs by message log context.
+- Tracable message logs by message log context.
 - Docker container setup.
 
 ## Web integration by sensor-webapi and sensor-dashboard

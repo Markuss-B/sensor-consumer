@@ -161,7 +161,7 @@ public class MqttWorker : BackgroundService
         _logger.LogDebug("Subscribing to topics: {topics}.", topics);
         foreach (var topic in topics)
         {
-            await _client.SubscribeAsync(topic);
+            await _client.SubscribeAsync("$share/group1/" + topic);
             _logger.LogInformation("Subscribed to topic: {topic}", topic);
         }
     }

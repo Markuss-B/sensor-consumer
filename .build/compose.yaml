@@ -1,20 +1,42 @@
 name: sensor
 
 services:
-  consumer:
+  consumer1:
     build: ../  
     # volumes:
     #   - ../certs:/certs
     networks:
       - sensor-network
-    container_name: sensor-consumer-dev
+    container_name: sensor-consumer1-dev
     environment:
       MongoDbSettings__ConnectionString: mongodb://sensor-mongo-dev:27017/?directConnection=true
       MongoDbSettings__DatabaseName: sensor-dev
-      MqttSettings__Topics: Aranetest/+/sensors/<sensorId>/json/measurements,Aranetest/+/sensors/<sensorId>/<metadataName>
+      MqttSettings__Topics: Test/+/<sensorId>/json/measurements,Test/<sensorId>/<metadataName>
       # MqttSettings__Broker: localhost
-      MqttSettings__Broker: broker.hivemq.com
-      MqttSettings__ProtocolVersion: V311
+      MqttSettings__Broker: sensor-mqtt-local
+      MqttSettings__ProtocolVersion: v500
+      # MqttSettings__Username:
+      # MqttSettings__Password:
+      MqttSettings__UseTls: "false"
+      # MqttSettings__PathToPem: /certs/ca.pem
+      # MqttSettings__SslProtocol: Tls12
+    depends_on:
+      - mongo
+
+  consumer2:
+    build: ../  
+    # volumes:
+    #   - ../certs:/certs
+    networks:
+      - sensor-network
+    container_name: sensor-consumer2-dev
+    environment:
+      MongoDbSettings__ConnectionString: mongodb://sensor-mongo-dev:27017/?directConnection=true
+      MongoDbSettings__DatabaseName: sensor-dev
+      MqttSettings__Topics: Test/+/<sensorId>/json/measurements,Test/<sensorId>/<metadataName>
+      # MqttSettings__Broker: localhost
+      MqttSettings__Broker: sensor-mqtt-local
+      MqttSettings__ProtocolVersion: V500
       # MqttSettings__Username:
       # MqttSettings__Password:
       MqttSettings__UseTls: "false"

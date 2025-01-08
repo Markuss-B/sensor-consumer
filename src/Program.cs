@@ -4,6 +4,7 @@ using SensorConsumer.Configuration.Validators;
 using SensorConsumer.Data;
 using SensorConsumer.Services;
 using SensorConsumer.Workers;
+using Serilog;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -13,6 +14,15 @@ var config = new ConfigurationBuilder()
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
     .AddEnvironmentVariables()
     .Build();
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(config)
+    .CreateLogger();
+
+// Logging
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog();
+
 
 // Configurations
 builder.Services.Configure<MqttSettings>(builder.Configuration.GetSection("MqttSettings"));

@@ -90,7 +90,7 @@ public class MqttWorker : BackgroundService
         async Task ProcessAsync()
         {
             // Create a logger scope for message
-            using (_logger.BeginScope("Message number {messageNumber}, Topic: {topic}", messageNumber, e.ApplicationMessage.Topic))
+            using (_logger.BeginScope(("MessageNumber", messageNumber)))
             {
                 try
                 {

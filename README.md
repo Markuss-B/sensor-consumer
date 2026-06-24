@@ -1,5 +1,7 @@
 See [presentation](Presentation.pdf) and [qualification paper](paper.pdf) for more info
 
+<img src="Architecture.svg">
+
 ## Part of Sensor Monitoring System
 - [sensor-consumer](https://github.com/Markuss-B/sensor-consumer)
 - [sensor-webapi](https://github.com/Markuss-B/sensor-webapi)

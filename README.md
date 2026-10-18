@@ -228,6 +228,9 @@ The processing pipeline follows these steps:
 | `InactiveSensorCacheWorker` | Synchronizes the cache with changes to sensor activation status |
 | `MqttSettingsValidation` | Validates configured MQTT topics and produces schemas for parsing them |
 
+<img width="1054" height="618" alt="image" src="https://github.com/user-attachments/assets/3f094fbb-3ba2-47ca-8957-5ae5acc6d3c2" />
+
+
 ## Supported MQTT Messages
 
 The consumer supports two types of messages: sensor measurements and sensor metadata.

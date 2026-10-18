@@ -183,3 +183,228 @@ The project demonstrates the integration of real-time data ingestion, backend se
 
 - [Project presentation](Presentation.pdf)
 - [Qualification paper](paper.pdf)
+
+# Sensor Consumer
+
+A .NET 8 background service that collects environmental sensor measurements and metadata from an MQTT broker and stores them in MongoDB.
+
+**Technologies:** C#, .NET 8, MQTTnet, MongoDB, Docker
+
+## Features
+
+- **MQTT integration:** Connects to a configurable MQTT broker, subscribes to sensor topics, and automatically attempts to reconnect when the connection is lost.
+- **Asynchronous message processing:** Processes incoming MQTT messages asynchronously.
+- **Configurable topic parsing:** Identifies sensors, measurement messages, and metadata using configurable MQTT topic schemas.
+- **Flexible data storage:** Stores measurements and metadata with dynamic fields in MongoDB.
+- **Sensor activation management:** Ignores messages from disabled sensors using an in-memory cache synchronized through MongoDB Change Streams.
+- **Metadata history:** Records changes in sensor metadata and administrative properties.
+- **Structured logging:** Associates processing logs with individual incoming messages for easier debugging.
+- **Containerization:** Supports Docker-based deployment and environment-specific configuration.
+
+## How It Works
+
+The consumer runs as a .NET background service and maintains a connection to an MQTT broker.
+
+Incoming messages are classified as either measurements or metadata according to their topic structure. Messages from inactive sensors are ignored, while accepted messages are processed and saved to MongoDB.
+
+The processing pipeline follows these steps:
+
+1. Connect to the configured MQTT broker.
+2. Subscribe to the configured measurement and metadata topics.
+3. Receive messages and identify their type and originating sensor.
+4. Check whether the sensor is active.
+5. Parse and transform the message.
+6. Store measurements or metadata in MongoDB.
+
+### Main Components
+
+| Component | Responsibility |
+|---|---|
+| `MqttWorker` | Manages MQTT connections, subscriptions, reconnection, and incoming messages |
+| `ProcessingService` | Classifies incoming messages, filters inactive sensors, and extracts data |
+| `SensorService` | Processes and persists sensor measurements and metadata |
+| `MongoDb` | Provides database access |
+| `InactiveSensorCache` | Maintains a thread-safe in-memory collection of disabled sensors |
+| `InactiveSensorCacheWorker` | Synchronizes the cache with changes to sensor activation status |
+| `MqttSettingsValidation` | Validates configured MQTT topics and produces schemas for parsing them |
+
+## Supported MQTT Messages
+
+The consumer supports two types of messages: sensor measurements and sensor metadata.
+
+MQTT topic schemas are configurable, allowing the service to work with different topic structures as long as the required information can be identified.
+
+### Measurement Messages
+
+An example measurement topic:
+
+`Aranet/SNS12/json/measurements`
+
+Example JSON payload:
+
+```json
+{
+  "time": 1735320000,
+  "co2": 950,
+  "temperature": 22.5,
+  "humidity": 42
+}
+```
+
+The measurement message must:
+
+- Be formatted as JSON.
+- Include a `time` field containing a Unix timestamp in seconds.
+- Have a sensor identifier that can be extracted from the MQTT topic.
+
+Measurement fields are stored dynamically, allowing sensors to report different measurement types without requiring a predefined schema for every sensor.
+
+### Metadata Messages
+
+An example metadata topic:
+
+`Aranet/SNS12/name`
+
+Example payload:
+
+```text
+Office Sensor
+```
+
+The topic identifies the sensor and metadata attribute, while the message payload contains its value.
+
+Metadata updates are stored as part of the sensor's current information, with changes recorded in a separate history collection.
+
+### Configurable Topic Schemas
+
+Topic patterns contain placeholders identifying the sensor ID and metadata attribute.
+
+For example:
+
+```text
+Aranet/+/sensors/<sensorId>/json/measurements
+Aranet/+/sensors/<sensorId>/<metadataName>
+```
+
+The application converts these patterns into MQTT subscription filters and determines the positions of the relevant fields.
+
+This separates incoming message interpretation from a particular MQTT topic hierarchy.
+
+## MongoDB Storage
+
+The consumer uses three primary collections:
+
+| Collection | Purpose |
+|---|---|
+| `sensors` | Sensor information, current metadata, activation status, and latest measurements |
+| `sensorMeasurements` | Historical sensor measurements and their timestamps |
+| `sensorMetadatas` | History of sensor metadata and administrative property changes |
+
+Measurements and metadata are represented using dynamic key-value fields, allowing the system to accommodate different sensor data structures.
+
+## Inactive Sensor Management
+
+The system allows administrators to disable data collection for individual sensors through the web application.
+
+To avoid repeatedly querying MongoDB for each received message, the consumer maintains an in-memory cache of inactive sensor IDs.
+
+### Cache Implementation
+
+The cache uses `ConcurrentDictionary<string, byte>` to support thread-safe access from concurrently executing message-processing tasks.
+
+When the application starts, the cache is populated with currently inactive sensors.
+
+The `InactiveSensorCacheWorker` then uses MongoDB Change Streams to observe changes to the `isActive` property.
+
+When a sensor is activated or deactivated, its entry in the cache is updated accordingly.
+
+This allows changes made through the web application to affect message processing without restarting the consumer.
+
+## Connection Management and Logging
+
+The `MqttWorker` runs as a hosted background service.
+
+It maintains the MQTT connection, checks connection health periodically, and attempts to reconnect when connectivity is lost.
+
+Incoming messages are handed over for asynchronous processing.
+
+A logging scope associates each message with its sequence number and MQTT topic, making it easier to trace processing events and investigate failures.
+
+## Configuration
+
+The application can be configured through `appsettings.json` or environment variables.
+
+### MQTT Settings
+
+| Setting | Description |
+|---|---|
+| `MqttSettings__Broker` | MQTT broker hostname |
+| `MqttSettings__ProtocolVersion` | MQTT protocol version |
+| `MqttSettings__Topics` | Comma-separated MQTT topic patterns |
+| `MqttSettings__UseTls` | Whether to use TLS |
+| `MqttSettings__Username` | Optional authentication username |
+| `MqttSettings__Password` | Optional authentication password |
+| `MqttSettings__PathToPem` | Optional path to a PEM certificate |
+| `MqttSettings__SslProtocol` | TLS protocol configuration |
+
+### MongoDB Settings
+
+| Setting | Description |
+|---|---|
+| `MongoDbSettings__ConnectionString` | MongoDB connection string |
+| `MongoDbSettings__DatabaseName` | Database name |
+
+## Running Locally with Docker
+
+The repository includes a Docker Compose configuration in the `.build` directory.
+
+It starts the consumer and a MongoDB instance configured as a single-node replica set.
+
+A MongoDB replica set is required for Change Streams functionality.
+
+### Prerequisites
+
+- Docker with Docker Compose
+- Access to an MQTT broker publishing compatible sensor messages
+
+### Start the Application
+
+Create the Docker network used by the Compose configuration:
+
+```bash
+docker network create sensor-network
+```
+
+From the `.build` directory, run:
+
+```bash
+docker compose up -d --build
+```
+
+Inspect the consumer logs:
+
+```bash
+docker logs -f sensor-consumer-dev
+```
+
+The default configuration connects to the public HiveMQ broker using the example `Aranetest` topics.
+
+You can modify the broker, topics, and database settings in `.build/compose.yaml`.
+
+The MongoDB instance is exposed locally on port `27017`.
+
+**Note:** Measurements appear in MongoDB only when compatible messages are published to the configured MQTT topics.
+
+## Related Projects
+
+The Sensor Consumer is one component of the larger Sensor Monitoring System.
+
+| Component | Responsibility |
+|---|---|
+| [Sensor Consumer](https://github.com/Markuss-B/sensor-consumer) | Receives and processes MQTT sensor measurements and metadata, storing them in MongoDB |
+| [Sensor Web API](https://github.com/Markuss-B/sensor-webapi) | Provides REST endpoints for sensor and notification management and real-time updates through SignalR |
+| [Sensor Dashboard](https://github.com/Markuss-B/sensor-dashboard) | Angular web application for viewing measurements, managing sensors, and configuring notifications |
+| [Sensor Notifications](https://github.com/Markuss-B/sensor-notifications) | Evaluates measurement-based notification rules and tracks active and resolved violations |
+| [Sensor Courier](https://github.com/Markuss-B/sensor-courier) | Exports measurements from MongoDB to SQL Server or MySQL |
+
+For an overview of the complete platform, see the main system documentation.
